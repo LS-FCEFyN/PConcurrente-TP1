@@ -1,6 +1,7 @@
 package utils;
 
 import ctmtypes.CustomImage;
+import ctmtypes.ImageContainer;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -73,10 +74,9 @@ public class ImageLoader implements Runnable {
                     /* Add the CustomImage instance to the
                      * ImageContainer.
                      */
-                    synchronized (container) {
-                        this.container.getContainer().add(new
-                                CustomImage(ImageIO.read(path.toFile())));
-                    }
+
+                    container.addImage(new
+                            CustomImage(ImageIO.read(path.toFile())));
 
                 } catch (IOException e) {
                     /* Handle exception accordingly */

@@ -1,4 +1,4 @@
-import utils.ImageContainer;
+import ctmtypes.ImageContainer;
 import utils.ImageFilter;
 import utils.ImageLoader;
 
@@ -34,14 +34,17 @@ public class Main {
         final JFrame frame2 = new JFrame("Image Display");
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        final JLabel label2 =
-                new JLabel(new ImageIcon(cont.getContainer().get(0).
-                getImage().
-                getScaledInstance(800, 600, Image.SCALE_SMOOTH)));
+        JPanel panel = new JPanel(new GridLayout(0, 1)); // Create a panel to hold the images
 
-        frame2.getContentPane().add(label2, BorderLayout.CENTER);
+        for (int i = 0; i < cont.getContainer().size(); i++) {
+            JLabel label = new JLabel(new ImageIcon(cont.getContainer().get(i)
+                    .getImage().getScaledInstance(800, 600, Image.SCALE_SMOOTH)));
+            panel.add(label); // Add the label to the panel
+        }
 
-        // Display the frame
+        frame2.getContentPane().add(new JScrollPane(panel), BorderLayout.CENTER); // Add the panel to a scroll pane and add to the frame
+
+// Display the frame
         frame2.pack();
         frame2.setVisible(true);
 

@@ -1,6 +1,7 @@
 package utils;
 
 import ctmtypes.CustomImage;
+import ctmtypes.ImageContainer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -74,13 +75,13 @@ public class ImageFilter implements Runnable {
         final int numPixels = hsbImage.getWidth() * hsbImage.getHeight();
 
         float[] cdf = new float[256];
-        cdf[0] = brightnessValues[0] / (float) numPixels;
+        cdf[0] = brightnessValues[0];
         for (int i = 1; i < 256; i++) {
-            cdf[i] = cdf[i - 1] + brightnessValues[i] / (float) numPixels;
+            cdf[i] = cdf[i - 1] + brightnessValues[i];
         }
 
         for (int i = 0; i < 256; i++) {
-            cdf[i] /= cdf[255];
+            cdf[i] /= numPixels;
         }
 
         int[] map = new int[256];
@@ -145,12 +146,9 @@ public class ImageFilter implements Runnable {
 
         Collections.shuffle(images);
 
-        // TODO Fix synchronization
         for (final CustomImage image : images) {
-            synchronized (image) {
                 image.setImprovements(
                         applyHistogramEqualization(image.getImage()));
-            }
         }
     }
 

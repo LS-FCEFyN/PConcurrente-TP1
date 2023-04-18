@@ -3,7 +3,7 @@ package ctmtypes;
 import java.awt.image.BufferedImage;
 
 /**
- * This class represents a custom image,
+ * This class represents a thread-safe custom image,
  * which is a wrapper for a BufferedImage object and tracks the number
  * of improvements made to the image.
  */
@@ -34,7 +34,7 @@ public class CustomImage {
      *
      * @return the BufferedImage object.
      */
-    public BufferedImage getImage() {
+    public synchronized BufferedImage getImage() {
         return image;
     }
 
@@ -43,16 +43,16 @@ public class CustomImage {
      *
      * @return the number of improvements.
      */
-    public int getImprovements() {
+    public synchronized int getImprovements() {
         return improvements;
     }
 
     /**
      * Sets the number of improvements made to the image.
      *
-     * @param improvements the number of improvements.
+     * @param improved the improved BufferedImage.
      */
-    public void setImprovements(final BufferedImage improved) {
+    public synchronized void setImprovements(final BufferedImage improved) {
         this.improvements += 1;
         this.image = improved;
     }
