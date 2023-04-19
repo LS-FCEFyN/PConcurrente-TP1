@@ -4,9 +4,8 @@ import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
 /**
- * The ImageLoader class is responsible for loading image files from the input
- * path and storing them in the provided
- * ImageContainer instance.
+ * The ImageLoader class is responsible for storing CustomImage objects in
+ * the provided ImageContainer instance.
  */
 public class ImageLoader implements Runnable {
 
@@ -31,7 +30,9 @@ public class ImageLoader implements Runnable {
      */
     @Override
     public void run() {
-        container.addImage(new CustomImage());
+        while (container.getSize() < 100) {
+            container.addImage(new CustomImage());
+        }
     }
 }
 

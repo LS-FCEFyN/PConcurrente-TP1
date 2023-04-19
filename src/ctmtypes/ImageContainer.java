@@ -26,8 +26,17 @@ public class ImageContainer {
      *
      * @return the list of CustomImage objects.
      */
-    public List<CustomImage> getContainer() {
+    public synchronized List<CustomImage> getContainer() {
         return container;
+    }
+
+    /**
+     * Returns the amount of objects stored in the container.
+     *
+     * @return the amount of CustomImage objects.
+     */
+    public synchronized int getSize() {
+        return container.size();
     }
 
     /**

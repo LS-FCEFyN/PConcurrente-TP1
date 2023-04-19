@@ -3,7 +3,7 @@ package ctmtypes;
 /**
  * This class represents a thread-safe custom image,
  * it only tracks the number
- * of improvements made to a simulated image.
+ * of improvements made to a mock image.
  */
 public class CustomImage {
 
@@ -12,11 +12,23 @@ public class CustomImage {
      */
     private int improvements;
 
+    private boolean adjusted;
+
+
     /**
      * Constructs a new CustomImage object
      */
     public CustomImage() {
         this.improvements = 0;
+        this.adjusted = false;
+    }
+
+    public synchronized boolean isAdjusted() {
+        return adjusted;
+    }
+
+    public synchronized void adjust () {
+        adjusted = true;
     }
 
     /**

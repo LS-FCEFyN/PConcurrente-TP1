@@ -46,6 +46,7 @@ public class ImageFilter implements Runnable {
         for (final CustomImage image : images) {
                 image.setImprovements();
         }
+
     }
 
 }
