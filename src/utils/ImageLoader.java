@@ -24,14 +24,19 @@ public class ImageLoader implements Runnable {
         this.container = container;
     }
 
+    // TODO Do not throw raw exception types
     /**
      * Loads image files from the input path and stores them in the
      * ImageContainer instance.
      */
     @Override
     public void run() {
-        while (container.getSize() < 100) {
-            container.addImage(new CustomImage());
+        while (container.add(new CustomImage())) {
+            try {
+                Thread.sleep(44);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

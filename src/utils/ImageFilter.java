@@ -3,10 +3,8 @@ package utils;
 import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
+import java.util.Collections;
 
 /**
  * The ImageFilter class is responsible for concurrently manipulating the
@@ -29,6 +27,7 @@ public class ImageFilter implements Runnable {
         this.container = container;
     }
 
+    // TODO Do not throw raw exception types
     /**
      * Runs brightness histogram equalization on a list of CustomImage
      * objects by generating a pixel mapping based on the brightness
@@ -38,13 +37,20 @@ public class ImageFilter implements Runnable {
      */
     @Override
     public void run() {
-        final List<CustomImage> images =
-                new ArrayList<>(container.getContainer());
+        final ImageContainer images =
+                new ImageContainer();
+
+        images.addAll(container);
 
         Collections.shuffle(images);
 
         for (final CustomImage image : images) {
                 image.setImprovements();
+            try {
+                Thread.sleep(88);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }

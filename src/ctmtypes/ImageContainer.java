@@ -1,60 +1,33 @@
 package ctmtypes;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * This class represents a thread-safe container for CustomImage objects
  * and provides methods for accessing and manipulating them.
  */
-public class ImageContainer {
-    /**
-     * The list of CustomImage objects stored in the container.
-     */
-    private final List<CustomImage> container;
-
-    /**
-     * Constructs a new empty ImageContainer.
-     */
-    public ImageContainer() {
-        container = Collections.synchronizedList(new ArrayList<>());
-    }
-
-    /**
-     * Returns the list of CustomImage objects stored in the container.
-     *
-     * @return the list of CustomImage objects.
-     */
-    public synchronized List<CustomImage> getContainer() {
-        return container;
-    }
-
-    /**
-     * Returns the amount of objects stored in the container.
-     *
-     * @return the amount of CustomImage objects.
-     */
-    public synchronized int getSize() {
-        return container.size();
-    }
+public class ImageContainer extends ArrayList<CustomImage>{
 
     /**
      * Adds a CustomImage object to the container.
      *
      * @param image the CustomImage object to add.
      */
-    public synchronized void addImage(final CustomImage image) {
-        container.add(image);
+    @Override
+    public synchronized boolean add(final CustomImage image) {
+        return size() < 100 && super.add(image);
     }
 
-    /**
-     * Removes a CustomImage object from the container.
-     *
-     * @param image the CustomImage object to remove.
-     * @return true if the object was removed, false otherwise.
-     */
-    public synchronized boolean removeImage(final CustomImage image) {
-        return container.remove(image);
+
+    @Override
+    public synchronized boolean remove(final Object image) {
+        return !isEmpty() && super.remove(image);
     }
+
+    @Override
+    public synchronized boolean removeIf(final Predicate<? super CustomImage> filter) {
+        return super.removeIf(filter);
+    }
+
 }
