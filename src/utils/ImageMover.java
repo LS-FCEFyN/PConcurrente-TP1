@@ -1,13 +1,16 @@
 package utils;
 
 import ctmtypes.ImageContainer;
+import ctmtypes.ImageContainerIterator;
+
+import java.util.concurrent.Callable;
 
 /**
  * This ImageMover class is responsible for moving all images who have
  * already been processed (.i.e have had their brightness and resolution
  * modified) from one source to a destination
  */
-public class ImageMover implements Runnable{
+public class ImageMover implements Callable<Integer> {
 
     /**
      * Source container.
@@ -31,16 +34,16 @@ public class ImageMover implements Runnable{
         this.dest = dest;
     }
 
-    // TODO Do not throw raw exception types and add proper documentation
+    // TODO write proper documentation
     @Override
-    public void run() {
-        while (!src.isEmpty()) {
-            src.removeIf(image -> image.isAdjusted() && (dest.add(image) || true));
-            try {
-                Thread.sleep(64);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public Integer call() {
+        final int[] adjusted = {0};
+        ImageContainerIterator iterator = new ImageContainerIterator(src);
+
+        iterator.forEachRemaining(image -> {if(image.isAdjusted() && dest.add(image)){
+            adjusted[0]++;}});
+
+        return adjusted[0];
     }
+
 }

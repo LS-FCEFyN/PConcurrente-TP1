@@ -39,8 +39,8 @@ public class CustomImage {
     /**
      * Set the value of adjusted to true once the image has been resized
      */
-    public synchronized void adjust () {
-        adjusted = true;
+    public synchronized boolean adjust () {
+        return !isAdjusted() ? (adjusted=true || true) : false;
     }
 
     /**

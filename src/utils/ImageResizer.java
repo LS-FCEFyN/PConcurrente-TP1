@@ -4,13 +4,14 @@ import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
 /**
  * This ImageResizer class is responsible for resizing the images from one
  * container, images will only be resized once their brightness has been
  * adjusted trice.
  */
-public class ImageResizer implements Runnable {
+public class ImageResizer implements Callable<Integer> {
 
     /**
      * The ImageContainer instance to whose images are to be resized.
@@ -27,8 +28,9 @@ public class ImageResizer implements Runnable {
     }
 
     // TODO Do not throw raw exception types and add proper documentation
+
     @Override
-    public void run() {
+    public Integer call() {
         final ImageContainer images = new ImageContainer();
 
         images.addAll(container);
@@ -37,11 +39,13 @@ public class ImageResizer implements Runnable {
 
         boolean allAdjusted = false;
 
+        int adjusted = 0;
+
         while (!allAdjusted) {
             allAdjusted = true;
             for (final CustomImage image : images) {
                 if (!image.isAdjusted() && image.getImprovements() == 3) {
-                    image.adjust();
+                    adjusted += image.adjust() ? 1 : 0;
                     try {
                         Thread.sleep(110);
                     } catch (InterruptedException e) {
@@ -53,5 +57,6 @@ public class ImageResizer implements Runnable {
                 }
             }
         }
+        return adjusted;
     }
 }

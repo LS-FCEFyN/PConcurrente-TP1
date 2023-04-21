@@ -2,10 +2,7 @@ import ctmtypes.ImageContainer;
 
 import utils.*;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 
 public class Main {
@@ -15,72 +12,128 @@ public class Main {
         final ImageContainer processedImages = new ImageContainer();
 
 
-        // Create a ThreadLogger to log information every 500ms
+        /*------ Create a ThreadLogger to log information every 500ms ------*/
+
         final ThreadLogger logger = new ThreadLogger(cont, processedImages);
-        final ScheduledExecutorService loggerExecutor = Executors.newSingleThreadScheduledExecutor();
-        loggerExecutor.scheduleAtFixedRate(logger, 0, 500, TimeUnit.MILLISECONDS);
+        final ScheduledExecutorService loggerExecutor =
+                Executors.newSingleThreadScheduledExecutor();
+
+        loggerExecutor.scheduleAtFixedRate(logger, 0, 500,
+                TimeUnit.MILLISECONDS);
+
+        /*------ Create a ThreadLogger to log information every 500ms ------*/
+
 
         /*------ FIRST PROCESS ------*/
 
-        runner( new ImageLoader(cont),
-                new ImageLoader(cont));
+        ExecutorService executorService = Executors.newFixedThreadPool(2,
+                new NamedThreadFactory("ImageLoader"));
 
-        /*------ FIRST PROCESS ------*/
+        executorService.execute(new ImageLoader(cont));
+        executorService.execute(new ImageLoader(cont));
 
-        /*------ SECOND & THIRD PROCESS ------*/
+        executorService.shutdown();
 
-        runner( new ImageFilter(cont),
-                new ImageFilter(cont),
-                new ImageFilter(cont));
-
-        runner(
-                new ImageResizer(cont),
-                new ImageResizer(cont),
-                new ImageResizer(cont));
-
-        /*------ SECOND & THIRD PROCESS ------*/
-
-        /*------ FOURTH PROCESS ------*/
-
-        runner( new ImageMover(cont, processedImages),
-                new ImageMover(cont, processedImages));
-
-        /*------ FOURTH PROCESS ------*/
-
-        loggerExecutor.shutdown();
-
-    }
-
-    /**
-     * Executes a collection of Runnable tasks in parallel.
-     * The method blocks until all tasks have completed execution.
-     *
-     * @param args variable number of objects that implement the Runnable
-     *             interface
-     * @throws RuntimeException if an error occurs while executing a task
-     */
-    public static void runner(final Runnable... args) {
-        final ExecutorService executor =
-                Executors.newFixedThreadPool(args.length);
-
-        for (final Runnable arg : args) {
-                executor.execute(arg);
-        }
-
-        executor.shutdown();
 
         try {
             final boolean terminated =
-                    executor.awaitTermination(Integer.MAX_VALUE,
+                    executorService.awaitTermination(Integer.MAX_VALUE,
                             TimeUnit.MICROSECONDS);
             if (terminated) {
-                System.out.println("Executor terminated normally");
+                System.out.println("ImageLoader threads completed successfully");
             } else {
-                System.out.println("Executor was interrupted or timed out");
+                System.out.println("ImageLoader threads interrupted or timed " +
+                        "out");
             }
         } catch (InterruptedException e) {
             // handle interruption
         }
-    }
 
+        /*------ FIRST PROCESS ------*/
+
+        ExecutorService imageFilterService = Executors.newFixedThreadPool(3,
+                new NamedThreadFactory("ImageFilter"));
+
+        imageFilterService.execute(new ImageFilter(cont));
+        imageFilterService.execute(new ImageFilter(cont));
+        imageFilterService.execute(new ImageFilter(cont));
+
+        imageFilterService.shutdown();
+
+        try {
+            final boolean terminated = imageFilterService.awaitTermination(Integer.MAX_VALUE,
+                    TimeUnit.MILLISECONDS);
+            if (terminated) {
+                System.out.println("ImageFilter threads completed successfully");
+            } else {
+                System.out.println("ImageFilter threads interrupted or timed " +
+                        "out");
+            }
+        } catch (InterruptedException e) {
+            // handle interruption
+        }
+
+        ExecutorService imageResizerService = Executors.newFixedThreadPool(3,
+                new NamedThreadFactory("ImageResizer"));
+
+
+        Future<Integer> adjustedBy1 =
+                imageResizerService.submit(new ImageResizer(cont));
+        Future<Integer> adjustedBy2 =
+                imageResizerService.submit(new ImageResizer(cont));
+        Future<Integer> adjustedBy3 =
+                imageResizerService.submit(new ImageResizer(cont));
+
+        imageResizerService.shutdown();
+
+        try {
+            if (adjustedBy1.get() != null && adjustedBy2.get() != null && adjustedBy3.get() != null) {
+                System.out.println("ImageResizer threads completed successfully");
+                System.out.println("Images adjusted by thread ImageResizer-1: " + adjustedBy1.get());
+                System.out.println("Images adjusted by thread ImageResizer-2: " + adjustedBy2.get());
+                System.out.println("Images adjusted by thread ImageResizer-3: " + adjustedBy3.get());
+            }
+        } catch (InterruptedException e) {
+            // handle interruption
+        } catch (ExecutionException e) {
+            // handle exception thrown by task
+        }
+
+
+        ExecutorService imageMoverService = Executors.newFixedThreadPool(2,
+                new NamedThreadFactory("ImageMover"));
+
+        Future<Integer> movedBy1 = imageMoverService.submit(new ImageMover(cont,
+                processedImages));
+        Future<Integer> movedBy2 = imageMoverService.submit(new ImageMover(cont,
+                processedImages));
+
+        imageMoverService.shutdown();
+
+        try {
+            if (movedBy1.get() != null && movedBy2.get() != null) {
+                System.out.println("ImageMover threads completed successfully");
+                System.out.println("Images moved by thread ImageMover-1: " + movedBy1.get());
+                System.out.println("Images moved by thread ImageMover-2: " + movedBy2.get());
+            }
+        } catch (InterruptedException e) {
+            // handle interruption
+        } catch (ExecutionException e) {
+            // handle exception thrown by task
+        }
+
+        try {
+            if (loggerExecutor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                System.out.println("ThreadLogger thread completed successfully");
+            } else {
+                loggerExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            loggerExecutor.shutdownNow();
+        }
+
+        System.out.println("Main thread completed");
+        System.out.println(cont.size());
+
+    }
 }
