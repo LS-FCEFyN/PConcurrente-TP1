@@ -42,9 +42,15 @@ public class ImageMover implements Callable<AtomicInteger> {
     public AtomicInteger call() {
         AtomicInteger moved = new AtomicInteger();
         while (dest.size() < 100) {
-            src.removeIf(image -> image.isAdjusted() && (dest.add(image) || true));
+            src.removeIf(image -> {
+                if (image.isAdjusted() && (dest.add(image))) {
+                    moved.getAndIncrement();
+                    return true;
+                }
+                return false;
+            });
             try {
-                Thread.sleep(64);
+                Thread.sleep(29);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

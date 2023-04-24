@@ -56,6 +56,13 @@ public class ImageResizer implements Callable<AtomicInteger> {
             images.addAll(container);
 
             Collections.shuffle(images);
+
+            try {
+                Thread.sleep(78);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
         }
 
         return adjusted;

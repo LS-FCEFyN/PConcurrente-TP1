@@ -140,7 +140,5 @@ public class Main {
 
         System.out.println("Main thread completed");
 
-        System.out.println(processedImages.size());
-
     }
 }

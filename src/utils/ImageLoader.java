@@ -33,7 +33,7 @@ public class ImageLoader implements Runnable {
     public void run() {
         while (container.add(new CustomImage())) {
             try {
-                Thread.sleep(44);
+                Thread.sleep(29);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
