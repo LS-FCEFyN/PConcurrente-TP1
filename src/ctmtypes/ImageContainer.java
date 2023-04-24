@@ -1,6 +1,7 @@
 package ctmtypes;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 /**
@@ -9,6 +10,13 @@ import java.util.function.Predicate;
  */
 public class ImageContainer extends ArrayList<CustomImage>{
 
+    private AtomicInteger historicSize;
+
+    public ImageContainer() {
+        super();
+        this.historicSize = new AtomicInteger();
+    }
+
     /**
      * Adds a CustomImage object to the container.
      *
@@ -16,18 +24,27 @@ public class ImageContainer extends ArrayList<CustomImage>{
      */
     @Override
     public synchronized boolean add(final CustomImage image) {
-        return size() < 100 && super.add(image);
+        if(historicSize.get() < 100) {
+            historicSize.getAndIncrement();
+            return super.add(image);
+        }
+        return false;
     }
 
 
     @Override
     public synchronized boolean remove(final Object image) {
-        return !isEmpty() && super.remove(image);
+        return super.remove(image);
     }
 
     @Override
     public synchronized boolean removeIf(final Predicate<? super CustomImage> filter) {
         return super.removeIf(filter);
     }
+
+    public synchronized int getHistoricSize(){
+        return historicSize.get();
+    }
+
 
 }

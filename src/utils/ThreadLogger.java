@@ -44,17 +44,15 @@ public class ThreadLogger implements Runnable {
     public void run() {
         final int numInserted = cont.size();
         /* Amount of images whose brightness has been adjusted trice */
-        int numFullyImproved = 0;
+        int numFullyImproved =
+                (int) cont.stream().filter(image ->
+                        image.getImprovements() % 3 == 0
+                        && image.getImprovements() != 0).count();
         /* Amount of images whose resolution has been adjusted */
-        int numAdjusted = 0;
+        int numAdjusted =
+                (int) cont.stream().filter(image -> image.isAdjusted()).count();
         /* Amount of images that have been transferred to the final container */
         final int numFinished = processedImages.size();
-
-        for (final CustomImage image : cont) {
-            numFullyImproved += image.getImprovements() % 3 == 0 && image.getImprovements() != 0
-                    ? 1 : 0;
-            numAdjusted += image.isAdjusted() ? 1 : 0;
-        }
 
         final StringBuilder sb = new StringBuilder();
         sb.append("<table>");

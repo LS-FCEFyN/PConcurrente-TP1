@@ -4,7 +4,9 @@ import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * The ImageFilter class is responsible for concurrently manipulating the
@@ -40,18 +42,26 @@ public class ImageFilter implements Runnable {
         final ImageContainer images =
                 new ImageContainer();
 
-        images.addAll(container);
+        List<CustomImage> improvedImages = new ArrayList<>();
 
-        Collections.shuffle(images);
+        while(improvedImages.size() != 100) {
+            images.addAll(container);
 
-        for (final CustomImage image : images) {
+            Collections.shuffle(images);
+
+            images.forEach(image -> { if(!improvedImages.contains(image)) {
                 image.setImprovements();
-            try {
-                Thread.sleep(88);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                improvedImages.add(image);
             }
+                try {
+                    Thread.sleep(88);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
         }
+
 
     }
 

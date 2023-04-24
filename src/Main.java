@@ -1,8 +1,10 @@
+import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
 import utils.*;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class Main {
@@ -10,7 +12,6 @@ public class Main {
 
         final ImageContainer cont = new ImageContainer();
         final ImageContainer processedImages = new ImageContainer();
-
 
         /*------ Create a ThreadLogger to log information every 500ms ------*/
 
@@ -34,23 +35,9 @@ public class Main {
 
         executorService.shutdown();
 
-
-        try {
-            final boolean terminated =
-                    executorService.awaitTermination(Integer.MAX_VALUE,
-                            TimeUnit.MICROSECONDS);
-            if (terminated) {
-                System.out.println("ImageLoader threads completed successfully");
-            } else {
-                System.out.println("ImageLoader threads interrupted or timed " +
-                        "out");
-            }
-        } catch (InterruptedException e) {
-            // handle interruption
-        }
-
         /*------ FIRST PROCESS ------*/
 
+        /*------ SECOND & THIRD PROCESS ------*/
         ExecutorService imageFilterService = Executors.newFixedThreadPool(3,
                 new NamedThreadFactory("ImageFilter"));
 
@@ -59,6 +46,43 @@ public class Main {
         imageFilterService.execute(new ImageFilter(cont));
 
         imageFilterService.shutdown();
+
+        ExecutorService imageResizerService = Executors.newFixedThreadPool(3,
+                new NamedThreadFactory("ImageResizer"));
+
+        Future<AtomicInteger> adjustedBy1 =
+                imageResizerService.submit(new ImageResizer(cont));
+        Future<AtomicInteger> adjustedBy2 =
+                imageResizerService.submit(new ImageResizer(cont));
+        Future<AtomicInteger> adjustedBy3 =
+                imageResizerService.submit(new ImageResizer(cont));
+
+        imageResizerService.shutdown();
+
+        ExecutorService imageMoverService = Executors.newFixedThreadPool(2,
+                new NamedThreadFactory("ImageMover"));
+
+        Future<AtomicInteger> movedBy1 = imageMoverService.submit(new ImageMover(cont,
+                processedImages));
+        Future<AtomicInteger> movedBy2 = imageMoverService.submit(new ImageMover(cont,
+                processedImages));
+
+        imageMoverService.shutdown();
+
+        try {
+            final boolean terminated =
+                    executorService.awaitTermination(Integer.MAX_VALUE,
+                            TimeUnit.MICROSECONDS);
+            if (terminated) {
+                System.out.println("ImageLoader threads completed successfully");
+                System.out.println("Total images loaded: " + cont.getHistoricSize());
+            } else {
+                System.out.println("ImageLoader threads interrupted or timed " +
+                        "out");
+            }
+        } catch (InterruptedException e) {
+            // handle interruption
+        }
 
         try {
             final boolean terminated = imageFilterService.awaitTermination(Integer.MAX_VALUE,
@@ -73,20 +97,9 @@ public class Main {
             // handle interruption
         }
 
-        ExecutorService imageResizerService = Executors.newFixedThreadPool(3,
-                new NamedThreadFactory("ImageResizer"));
-
-
-        Future<Integer> adjustedBy1 =
-                imageResizerService.submit(new ImageResizer(cont));
-        Future<Integer> adjustedBy2 =
-                imageResizerService.submit(new ImageResizer(cont));
-        Future<Integer> adjustedBy3 =
-                imageResizerService.submit(new ImageResizer(cont));
-
-        imageResizerService.shutdown();
-
         try {
+            imageResizerService.awaitTermination(Integer.MAX_VALUE,
+                    TimeUnit.MILLISECONDS);
             if (adjustedBy1.get() != null && adjustedBy2.get() != null && adjustedBy3.get() != null) {
                 System.out.println("ImageResizer threads completed successfully");
                 System.out.println("Images adjusted by thread ImageResizer-1: " + adjustedBy1.get());
@@ -99,18 +112,9 @@ public class Main {
             // handle exception thrown by task
         }
 
-
-        ExecutorService imageMoverService = Executors.newFixedThreadPool(2,
-                new NamedThreadFactory("ImageMover"));
-
-        Future<Integer> movedBy1 = imageMoverService.submit(new ImageMover(cont,
-                processedImages));
-        Future<Integer> movedBy2 = imageMoverService.submit(new ImageMover(cont,
-                processedImages));
-
-        imageMoverService.shutdown();
-
         try {
+            imageMoverService.awaitTermination(Integer.MAX_VALUE,
+                    TimeUnit.MILLISECONDS);
             if (movedBy1.get() != null && movedBy2.get() != null) {
                 System.out.println("ImageMover threads completed successfully");
                 System.out.println("Images moved by thread ImageMover-1: " + movedBy1.get());
@@ -121,6 +125,8 @@ public class Main {
         } catch (ExecutionException e) {
             // handle exception thrown by task
         }
+
+        /*------ FOURTH PROCESS ------*/
 
         try {
             if (loggerExecutor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
@@ -133,7 +139,8 @@ public class Main {
         }
 
         System.out.println("Main thread completed");
-        System.out.println(cont.size());
+
+        System.out.println(processedImages.size());
 
     }
 }

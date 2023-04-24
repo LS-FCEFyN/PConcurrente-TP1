@@ -1,16 +1,19 @@
 package utils;
 
+import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 import ctmtypes.ImageContainerIterator;
 
+import java.util.Iterator;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This ImageMover class is responsible for moving all images who have
  * already been processed (.i.e have had their brightness and resolution
  * modified) from one source to a destination
  */
-public class ImageMover implements Callable<Integer> {
+public class ImageMover implements Callable<AtomicInteger> {
 
     /**
      * Source container.
@@ -36,14 +39,17 @@ public class ImageMover implements Callable<Integer> {
 
     // TODO write proper documentation
     @Override
-    public Integer call() {
-        final int[] adjusted = {0};
-        ImageContainerIterator iterator = new ImageContainerIterator(src);
-
-        iterator.forEachRemaining(image -> {if(image.isAdjusted() && dest.add(image)){
-            adjusted[0]++;}});
-
-        return adjusted[0];
+    public AtomicInteger call() {
+        AtomicInteger moved = new AtomicInteger();
+        while (dest.size() < 100) {
+            src.removeIf(image -> image.isAdjusted() && (dest.add(image) || true));
+            try {
+                Thread.sleep(64);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return moved;
     }
 
 }
