@@ -3,7 +3,6 @@ package utils;
 import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,6 @@ public class ImageFilter implements Runnable {
         this.container = container;
     }
 
-    // TODO Do not throw raw exception types
     /**
      * Runs brightness histogram equalization on a list of CustomImage
      * objects by generating a pixel mapping based on the brightness
@@ -42,17 +40,18 @@ public class ImageFilter implements Runnable {
         final ImageContainer images =
                 new ImageContainer();
 
-        List<CustomImage> improvedImages = new ArrayList<>();
+        final List<CustomImage> improvedImages = new ArrayList<>();
 
-        while(improvedImages.size() != 100) {
+        while (improvedImages.size() != 100) {
             images.addAll(container);
 
             Collections.shuffle(images);
 
-            images.forEach(image -> { if(!improvedImages.contains(image)) {
-                image.setImprovements();
-                improvedImages.add(image);
-            }
+            images.forEach(image -> {
+                if (!improvedImages.contains(image)) {
+                    image.setImprovements();
+                    improvedImages.add(image);
+                }
                 try {
                     Thread.sleep(88);
                 } catch (InterruptedException e) {

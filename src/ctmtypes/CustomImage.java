@@ -28,7 +28,6 @@ public class CustomImage {
     }
 
     /**
-     *
      * @return true if the image has been resized, false if it hasn't been
      * resized
      */
@@ -39,8 +38,8 @@ public class CustomImage {
     /**
      * Set the value of adjusted to true once the image has been resized
      */
-    public synchronized boolean adjust () {
-        return !isAdjusted() ? (adjusted=true || true) : false;
+    public synchronized boolean adjust() {
+        return !isAdjusted() && (adjusted = true);
     }
 
     /**

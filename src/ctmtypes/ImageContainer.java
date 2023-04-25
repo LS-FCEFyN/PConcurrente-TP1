@@ -1,20 +1,26 @@
 package ctmtypes;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * This class represents a thread-safe container for CustomImage objects
  * and provides methods for accessing and manipulating them.
  */
-public class ImageContainer extends ArrayList<CustomImage>{
+public class ImageContainer extends ArrayList<CustomImage> {
 
-    private AtomicInteger historicSize;
+    /**
+     * The historic size of this ImageContainer.
+     */
+    private Integer historicSize;
 
+    /**
+     * Constructs an empty ImageContainer with an initial historic size of zero.
+     */
     public ImageContainer() {
         super();
-        this.historicSize = new AtomicInteger();
+        this.historicSize = 0;
     }
 
     /**
@@ -24,8 +30,8 @@ public class ImageContainer extends ArrayList<CustomImage>{
      */
     @Override
     public synchronized boolean add(final CustomImage image) {
-        if(historicSize.get() < 100) {
-            historicSize.getAndIncrement();
+        if (historicSize < 100) {
+            historicSize++;
             return super.add(image);
         }
         return false;
@@ -42,8 +48,13 @@ public class ImageContainer extends ArrayList<CustomImage>{
         return super.removeIf(filter);
     }
 
-    public synchronized int getHistoricSize(){
-        return historicSize.get();
+    @Override
+    public synchronized void forEach(final Consumer<? super CustomImage> action) {
+        super.forEach(action);
+    }
+
+    public synchronized int getHistoricSize() {
+        return historicSize;
     }
 
 

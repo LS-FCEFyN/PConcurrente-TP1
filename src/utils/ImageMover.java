@@ -1,10 +1,7 @@
 package utils;
 
-import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
-import ctmtypes.ImageContainerIterator;
 
-import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,8 +25,7 @@ public class ImageMover implements Callable<AtomicInteger> {
     /**
      * Constructs an instance of ImageMover class.
      *
-     * @param src an instance of ImageContainer to move images from.
-     *
+     * @param src  an instance of ImageContainer to move images from.
      * @param dest an instance of ImageContainer to move images to.
      */
     public ImageMover(final ImageContainer src, final ImageContainer dest) {
@@ -40,10 +36,10 @@ public class ImageMover implements Callable<AtomicInteger> {
     // TODO write proper documentation
     @Override
     public AtomicInteger call() {
-        AtomicInteger moved = new AtomicInteger();
+        final AtomicInteger moved = new AtomicInteger();
         while (dest.size() < 100) {
             src.removeIf(image -> {
-                if (image.isAdjusted() && (dest.add(image))) {
+                if (image.isAdjusted() && dest.add(image)) {
                     moved.getAndIncrement();
                     return true;
                 }

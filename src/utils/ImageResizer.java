@@ -5,9 +5,9 @@ import ctmtypes.ImageContainer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * This ImageResizer class is responsible for resizing the images from one
@@ -30,32 +30,24 @@ public class ImageResizer implements Callable<AtomicInteger> {
         this.container = container;
     }
 
-    // TODO Do not throw raw exception types and add proper documentation
-
     @Override
     public AtomicInteger call() {
         final ImageContainer images = new ImageContainer();
 
-        images.addAll(container);
-
-        Collections.shuffle(images);
-
-        AtomicInteger adjusted = new AtomicInteger();
+        // Variables inside a lambda must be final or effectively final
+        final AtomicInteger adjusted = new AtomicInteger();
 
         // While all the images in the original container are not adjusted
         // Manipulate the images stream as follows
-        while(!images.stream().allMatch(CustomImage::isAdjusted)) {
-            images.stream().
-                    // Filter through all the images and return
-                    // those that are both not yet adjusted and have had
-                    // their brightness adjusted thrice
+        while (!container.stream().allMatch(CustomImage::isAdjusted)) {
+            images.addAll(container.stream().
                     filter(image -> !image.isAdjusted() &&
-                            image.getImprovements() == 3).
-                    forEach(image -> adjusted.addAndGet(image.adjust() ? 1 :
-                            0));
-            images.addAll(container);
-
+                            image.getImprovements() == 3 ).
+                    collect(Collectors.toCollection(ArrayList::new)));
             Collections.shuffle(images);
+            images.forEach(image -> adjusted.addAndGet(image.adjust() ? 1 :
+                            0));
+            images.clear();
 
             try {
                 Thread.sleep(78);

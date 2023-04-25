@@ -1,11 +1,18 @@
-import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
+import utils.ImageLoader;
+import utils.ImageFilter;
+import utils.ImageResizer;
+import utils.ImageMover;
+import utils.NamedThreadFactory;
+import utils.ThreadLogger;
 
-import utils.*;
-
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
     public static void main(String[] args) {
@@ -24,10 +31,7 @@ public class Main {
 
         /*------ Create a ThreadLogger to log information every 500ms ------*/
 
-
-        /*------ FIRST PROCESS ------*/
-
-        ExecutorService executorService = Executors.newFixedThreadPool(2,
+        final ExecutorService executorService = Executors.newFixedThreadPool(2,
                 new NamedThreadFactory("ImageLoader"));
 
         executorService.execute(new ImageLoader(cont));
@@ -35,10 +39,7 @@ public class Main {
 
         executorService.shutdown();
 
-        /*------ FIRST PROCESS ------*/
-
-        /*------ SECOND & THIRD PROCESS ------*/
-        ExecutorService imageFilterService = Executors.newFixedThreadPool(3,
+        final ExecutorService imageFilterService = Executors.newFixedThreadPool(3,
                 new NamedThreadFactory("ImageFilter"));
 
         imageFilterService.execute(new ImageFilter(cont));
@@ -47,24 +48,24 @@ public class Main {
 
         imageFilterService.shutdown();
 
-        ExecutorService imageResizerService = Executors.newFixedThreadPool(3,
+        final ExecutorService imageResizerService = Executors.newFixedThreadPool(3,
                 new NamedThreadFactory("ImageResizer"));
 
-        Future<AtomicInteger> adjustedBy1 =
+        final Future<AtomicInteger> adjustedBy1 =
                 imageResizerService.submit(new ImageResizer(cont));
-        Future<AtomicInteger> adjustedBy2 =
+        final Future<AtomicInteger> adjustedBy2 =
                 imageResizerService.submit(new ImageResizer(cont));
-        Future<AtomicInteger> adjustedBy3 =
+        final Future<AtomicInteger> adjustedBy3 =
                 imageResizerService.submit(new ImageResizer(cont));
 
         imageResizerService.shutdown();
 
-        ExecutorService imageMoverService = Executors.newFixedThreadPool(2,
+        final ExecutorService imageMoverService = Executors.newFixedThreadPool(2,
                 new NamedThreadFactory("ImageMover"));
 
-        Future<AtomicInteger> movedBy1 = imageMoverService.submit(new ImageMover(cont,
+        final Future<AtomicInteger> movedBy1 = imageMoverService.submit(new ImageMover(cont,
                 processedImages));
-        Future<AtomicInteger> movedBy2 = imageMoverService.submit(new ImageMover(cont,
+        final Future<AtomicInteger> movedBy2 = imageMoverService.submit(new ImageMover(cont,
                 processedImages));
 
         imageMoverService.shutdown();
@@ -125,8 +126,6 @@ public class Main {
         } catch (ExecutionException e) {
             // handle exception thrown by task
         }
-
-        /*------ FOURTH PROCESS ------*/
 
         try {
             if (loggerExecutor.awaitTermination(500, TimeUnit.MILLISECONDS)) {

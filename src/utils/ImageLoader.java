@@ -25,6 +25,7 @@ public class ImageLoader implements Runnable {
     }
 
     // TODO Do not throw raw exception types
+
     /**
      * Loads image files from the input path and stores them in the
      * ImageContainer instance.

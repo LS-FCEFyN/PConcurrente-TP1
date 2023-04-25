@@ -27,7 +27,7 @@ public class ThreadLogger implements Runnable {
             final FileHandler fileHandler = new FileHandler("log.html");
             fileHandler.setFormatter(new Formatter() {
                 @Override
-                public String format(java.util.logging.LogRecord record) {
+                public String format(final java.util.logging.LogRecord record) {
                     return record.getMessage() + "\n";
                 }
             });
@@ -44,13 +44,13 @@ public class ThreadLogger implements Runnable {
     public void run() {
         final int numInserted = cont.size();
         /* Amount of images whose brightness has been adjusted trice */
-        int numFullyImproved =
+        final int numFullyImproved =
                 (int) cont.stream().filter(image ->
                         image.getImprovements() % 3 == 0
-                        && image.getImprovements() != 0).count();
+                                && image.getImprovements() != 0).count();
         /* Amount of images whose resolution has been adjusted */
-        int numAdjusted =
-                (int) cont.stream().filter(image -> image.isAdjusted()).count();
+        final int numAdjusted =
+                (int) cont.stream().filter(CustomImage::isAdjusted).count();
         /* Amount of images that have been transferred to the final container */
         final int numFinished = processedImages.size();
 
@@ -78,8 +78,10 @@ public class ThreadLogger implements Runnable {
         }
         sb.append("</table>");
 
+        if (logger.isLoggable(Level.INFO)) {
+            logger.log(Level.INFO, sb.toString());
+        }
 
-        logger.log(Level.INFO, sb.toString());
     }
 
 }
