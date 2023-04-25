@@ -42,15 +42,15 @@ public class ThreadLogger implements Runnable {
 
     @Override
     public void run() {
-        final int numInserted = cont.size();
+        final int numInserted = cont.getHistoricSize();
         /* Amount of images whose brightness has been adjusted trice */
         final int numFullyImproved =
-                (int) cont.stream().filter(image ->
+                (int) processedImages.stream().filter(image ->
                         image.getImprovements() % 3 == 0
                                 && image.getImprovements() != 0).count();
         /* Amount of images whose resolution has been adjusted */
         final int numAdjusted =
-                (int) cont.stream().filter(CustomImage::isAdjusted).count();
+                (int) processedImages.stream().filter(CustomImage::isAdjusted).count();
         /* Amount of images that have been transferred to the final container */
         final int numFinished = processedImages.size();
 

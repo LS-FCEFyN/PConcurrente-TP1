@@ -1,3 +1,4 @@
+import ctmtypes.CustomImage;
 import ctmtypes.ImageContainer;
 import utils.ImageLoader;
 import utils.ImageFilter;
